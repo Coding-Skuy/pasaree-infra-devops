@@ -1,0 +1,33 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: pasaree
+      POSTGRES_USER: pasaree
+      POSTGRES_PASSWORD: rahasia
+    ports:
+      - "5433:5432"
+    volumes:
+      - pasaree-db:/var/lib/postgresql/data
+  backend:
+    build: ../pasaree-backend-service
+    environment:
+      DATABASE_URL: postgres://pasaree:rahasia@db:5432/pasaree
+      JWT_AUD: pasaree
+    ports:
+      - "8101:8101"
+    depends_on:
+      - db
+  web:
+    image: oven/bun:1.4
+    working_dir: /app
+    volumes:
+      - ../pasaree-web:/app
+    command: bun run dev --port 8102 --host 0.0.0.0
+    ports:
+      - "8102:8102"
+    depends_on:
+      - backend
+
+volumes:
+  pasaree-db:
